@@ -1,0 +1,92 @@
+// =============================================================================
+// modules/network.bicep
+// Virtual network for the lab landing zone. Contains the mandatory
+// AzureBastionSubnet (for Azure Bastion) and a subnet for the domain
+// controller. Optionally sets custom DNS servers so the VNet resolves against
+// the domain controller after it is promoted (second-pass DNS repoint).
+// =============================================================================
+
+@description('Resource name prefix in the form <prefix>-lab.')
+param namePrefixEnv string
+
+@description('Azure Government region.')
+param location string
+
+@description('Tags applied to all resources.')
+param tags object
+
+@description('VNet address space.')
+param vnetAddressPrefix string = '10.60.0.0/16'
+
+@description('Address prefix for the Azure Bastion subnet (must be /26 or larger).')
+param bastionSubnetPrefix string = '10.60.0.0/26'
+
+@description('Address prefix for the domain controller subnet.')
+param dcSubnetPrefix string = '10.60.1.0/24'
+
+@description('Custom DNS servers for the VNet. Leave empty to use Azure-provided DNS.')
+param dnsServers array = []
+
+var vnetName = '${namePrefixEnv}-vnet'
+var dcNsgName = '${namePrefixEnv}-dc-nsg'
+
+resource dcNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
+  name: dcNsgName
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'Allow-RDP-From-VNet'
+        properties: {
+          priority: 1000
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '3389'
+          sourceAddressPrefix: 'VirtualNetwork'
+          destinationAddressPrefix: 'VirtualNetwork'
+        }
+      }
+    ]
+  }
+}
+
+resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
+  name: vnetName
+  location: location
+  tags: tags
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        vnetAddressPrefix
+      ]
+    }
+    dhcpOptions: empty(dnsServers) ? null : {
+      dnsServers: dnsServers
+    }
+    subnets: [
+      {
+        name: 'AzureBastionSubnet'
+        properties: {
+          addressPrefix: bastionSubnetPrefix
+        }
+      }
+      {
+        name: 'dc'
+        properties: {
+          addressPrefix: dcSubnetPrefix
+          networkSecurityGroup: {
+            id: dcNsg.id
+          }
+        }
+      }
+    ]
+  }
+}
+
+output vnetId string = vnet.id
+output vnetName string = vnet.name
+output bastionSubnetId string = vnet.properties.subnets[0].id
+output dcSubnetId string = vnet.properties.subnets[1].id
