@@ -78,7 +78,15 @@ $ErrorActionPreference = 'Stop'
 
 function Invoke-AzCli {
     param([Parameter(Mandatory = $true)][string[]]$Arguments)
-    Write-Host "> az $($Arguments -join ' ')" -ForegroundColor DarkGray
+    $displayArgs = $Arguments | ForEach-Object {
+        if ($_ -match '^(adminPassword|dsrmPassword)=') {
+            "$($Matches[1])=***"
+        }
+        else {
+            $_
+        }
+    }
+    Write-Host "> az $($displayArgs -join ' ')" -ForegroundColor DarkGray
     & az @Arguments
     if ($LASTEXITCODE -ne 0) {
         throw "Azure CLI command failed (exit $LASTEXITCODE): az $($Arguments -join ' ')"
@@ -90,15 +98,19 @@ function New-RandomPassword {
     $upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
     $lower = 'abcdefghijkmnpqrstuvwxyz'
     $digit = '23456789'
-    $special = '!@#$%^&*()-_=+'
+    $special = '!@#%^*-_.'
     $all = $upper + $lower + $digit + $special
     $chars = @()
+    # Ensure the first character is alphabetic to avoid CLI parsing edge cases.
     $chars += ($upper.ToCharArray() | Get-Random)
     $chars += ($lower.ToCharArray() | Get-Random)
     $chars += ($digit.ToCharArray() | Get-Random)
     $chars += ($special.ToCharArray() | Get-Random)
     for ($i = 0; $i -lt 20; $i++) { $chars += ($all.ToCharArray() | Get-Random) }
-    return (($chars | Sort-Object { Get-Random }) -join '')
+
+    $first = $chars[0]
+    $rest = $chars[1..($chars.Count - 1)] | Sort-Object { Get-Random }
+    return ($first + ($rest -join ''))
 }
 
 function ConvertTo-Plain {
@@ -161,16 +173,34 @@ $deploymentName = "teamcenter-lab-$(Get-Date -Format 'yyyyMMddHHmmss')"
 $action = if ($WhatIf) { 'what-if' } else { 'create' }
 
 Write-Host "Running subscription deployment ($action) '$deploymentName' in $Location..." -ForegroundColor Cyan
-$deployArgs = @(
-    'deployment', 'sub', $action,
-    '--name', $deploymentName,
-    '--location', $Location,
-    '--template-file', $templateFile,
-    '--parameters', $paramFile,
-    '--parameters', "deployerObjectId=$DeployerObjectId",
-    '--parameters', "adminPassword=$adminPwPlain",
-    '--parameters', "dsrmPassword=$dsrmPwPlain"
-)
-Invoke-AzCli $deployArgs
+$secureParamFile = Join-Path $env:TEMP "$deploymentName.secure.parameters.json"
+$secureParamPayload = @{
+    '$schema' = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#'
+    contentVersion = '1.0.0.0'
+    parameters = @{
+        deployerObjectId = @{ value = $DeployerObjectId }
+        adminPassword = @{ value = $adminPwPlain }
+        dsrmPassword = @{ value = $dsrmPwPlain }
+    }
+}
+
+$secureParamPayload | ConvertTo-Json -Depth 10 | Set-Content -Path $secureParamFile -Encoding utf8 -NoNewline
+
+try {
+    $deployArgs = @(
+        'deployment', 'sub', $action,
+        '--name', $deploymentName,
+        '--location', $Location,
+        '--template-file', $templateFile,
+        '--parameters', $paramFile,
+        '--parameters', "@$secureParamFile"
+    )
+    Invoke-AzCli $deployArgs
+}
+finally {
+    if (Test-Path $secureParamFile) {
+        Remove-Item -Path $secureParamFile -Force -ErrorAction SilentlyContinue
+    }
+}
 
 Write-Host "Done. Passwords are stored in the lab Key Vault (secrets: dc-admin-password, dc-dsrm-password)." -ForegroundColor Green
