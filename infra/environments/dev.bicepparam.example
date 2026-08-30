@@ -8,3 +8,18 @@ param tags = {
   costCenter: 'REPLACE-ME'
   owner: 'REPLACE-ME'
 }
+
+// ---------------------------------------------------------------------------
+// Network mode
+// Default is create-mode: the deployment provisions the VNet, subnets and NSGs.
+//
+// To use an EXISTING VNet (same subscription, optionally a different resource
+// group), uncomment and fill in the block below:
+//
+// param deployVnet = false
+// param existingVnetName = 'REPLACE-ME-vnet'
+// param existingVnetResourceGroup = 'REPLACE-ME-networking-rg'  // omit/blank = deployment RG
+// param existingWebTierSubnetName = 'web-tier-sn'
+// param existingEnterpriseTierSubnetName = 'enterprise-tier-sn'
+// param existingResourceTierSubnetName = 'resource-tier-sn'
+// ---------------------------------------------------------------------------

@@ -24,11 +24,23 @@ param bastionSubnetPrefix string = '10.60.0.0/26'
 @description('Address prefix for the domain controller subnet.')
 param dcSubnetPrefix string = '10.60.1.0/24'
 
+@description('Subnet address prefix for the web tier.')
+param webTierSubnetPrefix string = '10.60.2.0/24'
+
+@description('Subnet address prefix for the enterprise tier.')
+param enterpriseTierSubnetPrefix string = '10.60.3.0/24'
+
+@description('Subnet address prefix for the resource tier.')
+param resourceTierSubnetPrefix string = '10.60.4.0/24'
+
 @description('Custom DNS servers for the VNet. Leave empty to use Azure-provided DNS.')
 param dnsServers array = []
 
 var vnetName = '${nameBase}-vnet1'
 var dcNsgName = '${nameBase}-dc-nsg1'
+var webNsgName = '${nameBase}-web-nsg1'
+var enterpriseNsgName = '${nameBase}-enterprise-nsg1'
+var resourceNsgName = '${nameBase}-resource-nsg1'
 
 resource dcNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   name: dcNsgName
@@ -50,6 +62,36 @@ resource dcNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
         }
       }
     ]
+  }
+}
+
+resource webNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
+  name: webNsgName
+  location: location
+  tags: tags
+  properties: {
+    // TODO: add Teamcenter web-tier security rules.
+    securityRules: []
+  }
+}
+
+resource enterpriseNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
+  name: enterpriseNsgName
+  location: location
+  tags: tags
+  properties: {
+    // TODO: add Teamcenter enterprise-tier security rules.
+    securityRules: []
+  }
+}
+
+resource resourceNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
+  name: resourceNsgName
+  location: location
+  tags: tags
+  properties: {
+    // TODO: add Teamcenter resource-tier security rules.
+    securityRules: []
   }
 }
 
@@ -82,6 +124,33 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
           }
         }
       }
+      {
+        name: 'web-tier-sn'
+        properties: {
+          addressPrefix: webTierSubnetPrefix
+          networkSecurityGroup: {
+            id: webNsg.id
+          }
+        }
+      }
+      {
+        name: 'enterprise-tier-sn'
+        properties: {
+          addressPrefix: enterpriseTierSubnetPrefix
+          networkSecurityGroup: {
+            id: enterpriseNsg.id
+          }
+        }
+      }
+      {
+        name: 'resource-tier-sn'
+        properties: {
+          addressPrefix: resourceTierSubnetPrefix
+          networkSecurityGroup: {
+            id: resourceNsg.id
+          }
+        }
+      }
     ]
   }
 }
@@ -90,3 +159,6 @@ output vnetId string = vnet.id
 output vnetName string = vnet.name
 output bastionSubnetId string = vnet.properties.subnets[0].id
 output dcSubnetId string = vnet.properties.subnets[1].id
+output webTierSubnetId string = vnet.properties.subnets[2].id
+output enterpriseTierSubnetId string = vnet.properties.subnets[3].id
+output resourceTierSubnetId string = vnet.properties.subnets[4].id

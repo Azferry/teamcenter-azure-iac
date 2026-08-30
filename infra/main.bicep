@@ -33,6 +33,27 @@ param location string = 'usgovvirginia'
 @description('Additional tags merged onto every resource.')
 param tags object = {}
 
+// ----------------------------- Network mode ----------------------------------
+
+@description('When true, create the VNet/subnets/NSGs. When false, reference an existing VNet (bring-your-own).')
+param deployVnet bool = true
+
+@description('BYO mode: name of the existing VNet to reference. Required when deployVnet = false.')
+param existingVnetName string = ''
+
+@description('BYO mode: resource group of the existing VNet (same subscription). Defaults to the deployment resource group when blank.')
+param existingVnetResourceGroup string = ''
+
+@description('BYO mode: name of the existing subnet for the web tier.')
+param existingWebTierSubnetName string = 'web-tier-sn'
+
+@description('BYO mode: name of the existing subnet for the enterprise tier.')
+param existingEnterpriseTierSubnetName string = 'enterprise-tier-sn'
+
+@description('BYO mode: name of the existing subnet for the resource tier.')
+param existingResourceTierSubnetName string = 'resource-tier-sn'
+
+
 // ----------------------------- Variables -------------------------------------
 
 // Naming: the convention is owned by the shared naming module and consumed here
@@ -79,6 +100,12 @@ module network 'modules/network/network.bicep' = {
     nameBase: nameBase
     location: location
     tags: allTags
+    deployVnet: deployVnet
+    existingVnetName: existingVnetName
+    existingVnetResourceGroup: existingVnetResourceGroup
+    existingWebTierSubnetName: existingWebTierSubnetName
+    existingEnterpriseTierSubnetName: existingEnterpriseTierSubnetName
+    existingResourceTierSubnetName: existingResourceTierSubnetName
   }
 }
 
@@ -99,7 +126,7 @@ module database 'modules/database/database.bicep' = {
     nameBase: nameBase
     location: location
     tags: allTags
-    subnetId: network.outputs.databaseSubnetId
+    subnetId: network.outputs.resourceTierSubnetId
   }
 }
 
@@ -110,7 +137,7 @@ module compute 'modules/compute/compute.bicep' = {
     nameBase: nameBase
     location: location
     tags: allTags
-    subnetId: network.outputs.computeSubnetId
+    subnetId: network.outputs.enterpriseTierSubnetId
   }
 }
 

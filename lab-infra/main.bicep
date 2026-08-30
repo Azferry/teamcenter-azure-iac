@@ -160,6 +160,9 @@ module networkDns 'modules/network.bicep' = {
 
 output resourceGroupNameOut string = rg.name
 output vnetId string = network.outputs.vnetId
+output webTierSubnetId string = network.outputs.webTierSubnetId
+output enterpriseTierSubnetId string = network.outputs.enterpriseTierSubnetId
+output resourceTierSubnetId string = network.outputs.resourceTierSubnetId
 output keyVaultName string = keyvault.outputs.keyVaultName
 output bastionName string = bastion.outputs.bastionName
 output domainControllerName string = dc.outputs.vmName
