@@ -67,7 +67,7 @@ To onboard a new region, add it to `regionCodeMap` in `modules/naming.bicep`
 
 ## Prerequisites
 
-- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) with the Bicep tooling (`az bicep install`)
+- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) with the Bicep tooling (`az bicep install`) - Version 0.46 or greater
 - PowerShell 5.1+ (or PowerShell 7+)
 - Access to an Azure **Government** subscription
 

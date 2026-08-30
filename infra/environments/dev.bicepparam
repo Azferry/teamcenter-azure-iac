@@ -30,7 +30,7 @@ param tags = {
 // deployPrivateDns = true and supply the zone IDs to auto-register the private
 // endpoints for the Key Vault and Recovery Services Vault.
 // ---------------------------------------------------------------------------
-param keyVaultPurgeProtection = false
+param keyVaultPurgeProtection = true
 param recoveryVaultPurgeProtection = false
 param deployPrivateDns = false
 // param keyVaultPrivateDnsZoneId = 'REPLACE-ME'

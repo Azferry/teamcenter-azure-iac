@@ -206,7 +206,7 @@ module encryptionset 'modules/encryptionset.bicep' = {
     tags: allTags
     keyVaultId: keyvault.outputs.keyVaultId
     keyVaultName: keyvault.outputs.keyVaultName
-    keyUrl: keyvault.outputs.desKeyUri
+    keyUrl: keyvault.outputs.desKeyUriWithVersion
   }
 }
 
