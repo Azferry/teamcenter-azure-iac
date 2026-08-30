@@ -16,8 +16,15 @@ infra/
   modules/
     network.bicep            # VNet, subnets, NSGs
     storage.bicep            # Storage account(s)
-    database.bicep           # Database tier (stub)
-    compute.bicep            # Compute tier (stub)
+    database.bicep           # Oracle DB tier (IaaS BYOL on RHEL)
+    compute.bicep            # Teamcenter compute tiers (parameter-driven)
+    fileshare.bicep          # Premium Azure Files share for FMS volumes
+    compute/
+      vm-role.bicep          # Reusable role VM module
+      ppg.bicep              # Proximity placement group helper
+    database/
+      oracle-vm.bicep        # Oracle primary/standby VM wrapper
+      oracle-dataguard.bicep # Optional Data Guard observer + standby
 scripts/
   Deploy-Teamcenter.ps1      # az cloud set -> login -> deploy
 ```
@@ -129,9 +136,38 @@ Parameters: `-Location` (default `usgovvirginia`), `-SubscriptionId`,
 > Note: domain controller promotion reboots the VM to complete. Access the DC
 > through the Bastion host; there is no public IP on the VM.
 
+## Teamcenter server roles and scaling
+
+Deployment is parameter-driven per role. Each role object supports at least:
+`enabled`, `count`, `vmSize`, `osType`, and `image`.
+
+- Set `enabled: false` or `count: 0` to skip a role.
+- Change `count` to scale out/in.
+- Default OS is **Windows Server 2022**, but each role can be switched to Linux by updating `osType` and `image`.
+
+Implemented roles:
+
+- Web tier: `webServer`, `tcss`
+- Enterprise tier: `enterprise`, `poolManager`, `awcPortal`, `fmsVolumeServer`, `fscCache`, `solr`, `dispatcher`, `visualization`, `licenseServer`
+- Resource tier (Oracle): `oraclePrimary`, `oracleStandby`, `oracleObserver`
+
+## Oracle on IaaS (BYOL)
+
+The database tier deploys Oracle VM infrastructure on RHEL BYOL defaults:
+
+- Image: `RedHat:RHEL:8-lvm-gen2:latest`
+- Primary SKU default: `Standard_E32-16ds_v4`
+- Data Guard standby and observer are optional and parameter-driven.
+
+## FMS storage
+
+Current implementation uses **Premium Azure Files (SMB)** with private endpoint.
+The deployment outputs the UNC path as `fmsFilesShareUnc`.
+
+Alternative noted for future use: FMS volume server VMs with attached/striped Premium managed disks.
+
 ## Extending
 
-- Add resources to the `compute` and `database` module stubs for each Teamcenter tier.
-- Adjust network address spaces in `modules/network.bicep`.
-- Tune per-environment settings in `infra/environments/*.bicepparam`.
+- Adjust subnet CIDRs and NSG rules in `infra/modules/network.bicep`.
+- Tune role objects in `infra/environments/*.bicepparam`.
 
