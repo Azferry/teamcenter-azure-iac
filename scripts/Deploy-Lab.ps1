@@ -173,18 +173,15 @@ $deploymentName = "teamcenter-lab-$(Get-Date -Format 'yyyyMMddHHmmss')"
 $action = if ($WhatIf) { 'what-if' } else { 'create' }
 
 Write-Host "Running subscription deployment ($action) '$deploymentName' in $Location..." -ForegroundColor Cyan
-$secureParamFile = Join-Path $env:TEMP "$deploymentName.secure.parameters.json"
-$secureParamPayload = @{
-    '$schema' = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#'
-    contentVersion = '1.0.0.0'
-    parameters = @{
-        deployerObjectId = @{ value = $DeployerObjectId }
-        adminPassword = @{ value = $adminPwPlain }
-        dsrmPassword = @{ value = $dsrmPwPlain }
-    }
-}
+# Azure CLI does not allow mixing a .bicepparam file with @json parameter files.
+# Provide runtime values via environment variables consumed by readEnvironmentVariable(...).
+$priorDeployerObjectId = [Environment]::GetEnvironmentVariable('DEPLOYER_OBJECT_ID', 'Process')
+$priorAdminPassword = [Environment]::GetEnvironmentVariable('ADMIN_PASSWORD', 'Process')
+$priorDsrmPassword = [Environment]::GetEnvironmentVariable('DSRM_PASSWORD', 'Process')
 
-$secureParamPayload | ConvertTo-Json -Depth 10 | Set-Content -Path $secureParamFile -Encoding utf8 -NoNewline
+[Environment]::SetEnvironmentVariable('DEPLOYER_OBJECT_ID', $DeployerObjectId, 'Process')
+[Environment]::SetEnvironmentVariable('ADMIN_PASSWORD', $adminPwPlain, 'Process')
+[Environment]::SetEnvironmentVariable('DSRM_PASSWORD', $dsrmPwPlain, 'Process')
 
 try {
     $deployArgs = @(
@@ -192,15 +189,14 @@ try {
         '--name', $deploymentName,
         '--location', $Location,
         '--template-file', $templateFile,
-        '--parameters', $paramFile,
-        '--parameters', "@$secureParamFile"
+        '--parameters', $paramFile
     )
     Invoke-AzCli $deployArgs
 }
 finally {
-    if (Test-Path $secureParamFile) {
-        Remove-Item -Path $secureParamFile -Force -ErrorAction SilentlyContinue
-    }
+    [Environment]::SetEnvironmentVariable('DEPLOYER_OBJECT_ID', $priorDeployerObjectId, 'Process')
+    [Environment]::SetEnvironmentVariable('ADMIN_PASSWORD', $priorAdminPassword, 'Process')
+    [Environment]::SetEnvironmentVariable('DSRM_PASSWORD', $priorDsrmPassword, 'Process')
 }
 
 Write-Host "Done. Passwords are stored in the lab Key Vault (secrets: dc-admin-password, dc-dsrm-password)." -ForegroundColor Green

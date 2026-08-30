@@ -3,13 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "deployerObjectId": {
-      "value": "00000000-0000-0000-0000-000000000000"
+      "value": ""
     },
     "adminPassword": {
-      "value": "TempPass!234567890Abc"
+      "value": ""
     },
     "dsrmPassword": {
-      "value": "TempPass!234567890Xyz"
+      "value": ""
     },
     "org": {
       "value": "ntc"

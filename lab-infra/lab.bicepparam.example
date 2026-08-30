@@ -10,7 +10,7 @@ param dsrmPassword = readEnvironmentVariable('DSRM_PASSWORD', '')
 
 param org = 'ntc'
 param label = 'plm'
-param location = 'eastus'
+param location = 'usgovvirginia'
 param domainName = 'lab.local'
 param dcPrivateIp = '10.60.1.4'
 param adminUsername = 'labadmin'
