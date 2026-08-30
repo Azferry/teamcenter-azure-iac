@@ -23,3 +23,15 @@ param tags = {
 // param existingEnterpriseTierSubnetName = 'enterprise-tier-sn'
 // param existingResourceTierSubnetName = 'resource-tier-sn'
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Security / DR
+// Production: purge protection ON for both vaults. Private DNS is BYO: set
+// deployPrivateDns = true and supply the zone IDs to auto-register the private
+// endpoints for the Key Vault and Recovery Services Vault.
+// ---------------------------------------------------------------------------
+param keyVaultPurgeProtection = true
+param recoveryVaultPurgeProtection = true
+param deployPrivateDns = false
+// param keyVaultPrivateDnsZoneId = 'REPLACE-ME'
+// param recoveryVaultPrivateDnsZoneId = 'REPLACE-ME'

@@ -53,6 +53,23 @@ param existingEnterpriseTierSubnetName string = 'enterprise-tier-sn'
 @description('BYO mode: name of the existing subnet for the resource tier.')
 param existingResourceTierSubnetName string = 'resource-tier-sn'
 
+// ----------------------------- Security / DR ---------------------------------
+
+@description('Enable purge protection on the Key Vault. Once enabled it cannot be disabled.')
+param keyVaultPurgeProtection bool = false
+
+@description('Enable soft-delete / enhanced security (purge protection) on the Recovery Services Vault.')
+param recoveryVaultPurgeProtection bool = false
+
+@description('When true and zone IDs are supplied, link private endpoints to their private DNS zones. When false, DNS is client-managed (BYO).')
+param deployPrivateDns bool = false
+
+@description('BYO: resource ID of the privatelink.vaultcore.usgovcloudapi.net private DNS zone (Key Vault).')
+param keyVaultPrivateDnsZoneId string = ''
+
+@description('BYO: resource ID of the AzureBackup private DNS zone (Recovery Services Vault).')
+param recoveryVaultPrivateDnsZoneId string = ''
+
 
 // ----------------------------- Variables -------------------------------------
 
@@ -141,7 +158,63 @@ module compute 'modules/compute/compute.bicep' = {
   }
 }
 
+module identity 'modules/identity/identity.bicep' = {
+  name: 'deploy-identity'
+  scope: rg
+  params: {
+    nameBase: nameBase
+    location: location
+    tags: allTags
+  }
+}
+
+module keyvault 'modules/keyvault/keyvault.bicep' = {
+  name: 'deploy-keyvault'
+  scope: rg
+  params: {
+    nameBaseCompact: nameBaseCompact
+    location: location
+    tags: allTags
+    subnetId: network.outputs.resourceTierSubnetId
+    enablePurgeProtection: keyVaultPurgeProtection
+    deployPrivateDns: deployPrivateDns
+    privateDnsZoneId: keyVaultPrivateDnsZoneId
+  }
+}
+
+module encryptionset 'modules/encryption/encryptionset.bicep' = {
+  name: 'deploy-encryptionset'
+  scope: rg
+  params: {
+    nameBase: nameBase
+    location: location
+    tags: allTags
+    keyVaultId: keyvault.outputs.keyVaultId
+    keyVaultName: keyvault.outputs.keyVaultName
+    keyUrl: keyvault.outputs.desKeyUri
+  }
+}
+
+module backup 'modules/backup/recoveryservicesvault.bicep' = {
+  name: 'deploy-backup'
+  scope: rg
+  params: {
+    nameBase: nameBase
+    location: location
+    tags: allTags
+    subnetId: network.outputs.resourceTierSubnetId
+    enablePurgeProtection: recoveryVaultPurgeProtection
+    deployPrivateDns: deployPrivateDns
+    privateDnsZoneId: recoveryVaultPrivateDnsZoneId
+  }
+}
+
 // ----------------------------- Outputs ---------------------------------------
 
 output resourceGroupNameOut string = rg.name
 output vnetId string = network.outputs.vnetId
+output managedIdentityId string = identity.outputs.managedIdentityId
+output keyVaultId string = keyvault.outputs.keyVaultId
+output diskEncryptionSetId string = encryptionset.outputs.diskEncryptionSetId
+output recoveryServicesVaultId string = backup.outputs.recoveryServicesVaultId
+
