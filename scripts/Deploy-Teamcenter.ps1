@@ -71,7 +71,7 @@ function Invoke-AzCli {
 
 # Resolve paths relative to this script.
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$infraRoot = Resolve-Path (Join-Path $scriptRoot '..' 'infra')
+$infraRoot = Resolve-Path (Join-Path (Join-Path $scriptRoot '..') 'infra')
 $templateFile = Join-Path $infraRoot 'main.bicep'
 $paramFile = Join-Path $infraRoot "environments/$Environment.bicepparam"
 

@@ -110,7 +110,7 @@ function ConvertTo-Plain {
 
 # Resolve paths relative to this script.
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$labRoot = Resolve-Path (Join-Path $scriptRoot '..' 'lab-infra')
+$labRoot = Resolve-Path (Join-Path (Join-Path $scriptRoot '..') 'lab-infra')
 $templateFile = Join-Path $labRoot 'main.bicep'
 $paramFile = Join-Path $labRoot 'lab.bicepparam'
 
