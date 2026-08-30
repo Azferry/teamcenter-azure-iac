@@ -13,8 +13,13 @@
     password) are NEVER committed to source. If they are not supplied, strong
     random values are generated at deploy time and stored in the lab Key Vault.
 
+.PARAMETER Cloud
+    Target Azure cloud. One of: AzureCloud (commercial) or AzureUSGovernment
+    (US Gov). Defaults to AzureUSGovernment.
+
 .PARAMETER Location
-    Azure Government region for the deployment. Defaults to usgovvirginia.
+    Azure region for the deployment. If omitted, a per-cloud default is used
+    (eastus for AzureCloud, usgovvirginia for AzureUSGovernment).
 
 .PARAMETER SubscriptionId
     Subscription to deploy into. If omitted, the current default is used.
@@ -44,7 +49,11 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string]$Location = 'usgovvirginia',
+    [ValidateSet('AzureCloud', 'AzureUSGovernment')]
+    [string]$Cloud = 'AzureUSGovernment',
+
+    [Parameter()]
+    [string]$Location,
 
     [Parameter()]
     [string]$SubscriptionId,
@@ -113,12 +122,17 @@ if (-not (Get-Command az -ErrorAction SilentlyContinue)) {
     throw 'Azure CLI (az) is not installed or not on PATH.'
 }
 
-# 1. Switch to Azure Government cloud.
-Write-Host "Switching Azure CLI cloud to AzureUSGovernment..." -ForegroundColor Cyan
-Invoke-AzCli @('cloud', 'set', '--name', 'AzureUSGovernment')
+# Default the region based on the selected cloud if not explicitly provided.
+if (-not $Location) {
+    $Location = if ($Cloud -eq 'AzureUSGovernment') { 'usgovvirginia' } else { 'eastus' }
+}
+
+# 1. Switch to the target Azure cloud.
+Write-Host "Switching Azure CLI cloud to $Cloud..." -ForegroundColor Cyan
+Invoke-AzCli @('cloud', 'set', '--name', $Cloud)
 
 # 2. Login.
-Write-Host "Logging in to Azure Government..." -ForegroundColor Cyan
+Write-Host "Logging in to $Cloud..." -ForegroundColor Cyan
 $loginArgs = @('login')
 if ($TenantId) { $loginArgs += @('--tenant', $TenantId) }
 Invoke-AzCli $loginArgs
