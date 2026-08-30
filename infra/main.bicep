@@ -110,7 +110,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 
 // ----------------------------- Modules ---------------------------------------
 
-module network 'modules/network/network.bicep' = {
+module network 'modules/network.bicep' = {
   name: 'deploy-network'
   scope: rg
   params: {
@@ -126,7 +126,7 @@ module network 'modules/network/network.bicep' = {
   }
 }
 
-module storage 'modules/storage/storage.bicep' = {
+module storage 'modules/storage.bicep' = {
   name: 'deploy-storage'
   scope: rg
   params: {
@@ -136,7 +136,7 @@ module storage 'modules/storage/storage.bicep' = {
   }
 }
 
-module database 'modules/database/database.bicep' = {
+module database 'modules/database.bicep' = {
   name: 'deploy-database'
   scope: rg
   params: {
@@ -147,7 +147,7 @@ module database 'modules/database/database.bicep' = {
   }
 }
 
-module compute 'modules/compute/compute.bicep' = {
+module compute 'modules/compute.bicep' = {
   name: 'deploy-compute'
   scope: rg
   params: {
@@ -158,7 +158,7 @@ module compute 'modules/compute/compute.bicep' = {
   }
 }
 
-module identity 'modules/identity/identity.bicep' = {
+module identity 'modules/identity.bicep' = {
   name: 'deploy-identity'
   scope: rg
   params: {
@@ -168,7 +168,7 @@ module identity 'modules/identity/identity.bicep' = {
   }
 }
 
-module keyvault 'modules/keyvault/keyvault.bicep' = {
+module keyvault 'modules/keyvault.bicep' = {
   name: 'deploy-keyvault'
   scope: rg
   params: {
@@ -182,7 +182,7 @@ module keyvault 'modules/keyvault/keyvault.bicep' = {
   }
 }
 
-module encryptionset 'modules/encryption/encryptionset.bicep' = {
+module encryptionset 'modules/encryptionset.bicep' = {
   name: 'deploy-encryptionset'
   scope: rg
   params: {
@@ -195,7 +195,7 @@ module encryptionset 'modules/encryption/encryptionset.bicep' = {
   }
 }
 
-module backup 'modules/backup/recoveryservicesvault.bicep' = {
+module backup 'modules/recoveryservicesvault.bicep' = {
   name: 'deploy-backup'
   scope: rg
   params: {

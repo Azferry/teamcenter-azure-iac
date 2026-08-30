@@ -1,5 +1,5 @@
 // =============================================================================
-// modules/compute/compute.bicep
+// modules/compute.bicep
 // Compute tier for Teamcenter (application/web/pool manager servers).
 // STUB: intentionally minimal — add VMs / VMSS for each Teamcenter tier.
 // =============================================================================

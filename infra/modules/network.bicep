@@ -1,5 +1,5 @@
 // =============================================================================
-// modules/network/network.bicep
+// modules/network.bicep
 // Virtual network, subnets and NSGs for the Teamcenter tiers.
 //
 // Supports two modes:

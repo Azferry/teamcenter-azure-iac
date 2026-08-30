@@ -14,10 +14,10 @@ infra/
     tst.bicepparam
     prd.bicepparam
   modules/
-    network/network.bicep    # VNet, subnets, NSGs
-    storage/storage.bicep    # Storage account(s)
-    database/database.bicep  # Database tier (stub)
-    compute/compute.bicep    # Compute tier (stub)
+    network.bicep            # VNet, subnets, NSGs
+    storage.bicep            # Storage account(s)
+    database.bicep           # Database tier (stub)
+    compute.bicep            # Compute tier (stub)
 scripts/
   Deploy-Teamcenter.ps1      # az cloud set -> login -> deploy
 ```
@@ -132,6 +132,6 @@ Parameters: `-Location` (default `usgovvirginia`), `-SubscriptionId`,
 ## Extending
 
 - Add resources to the `compute` and `database` module stubs for each Teamcenter tier.
-- Adjust network address spaces in `modules/network/network.bicep`.
+- Adjust network address spaces in `modules/network.bicep`.
 - Tune per-environment settings in `infra/environments/*.bicepparam`.
 

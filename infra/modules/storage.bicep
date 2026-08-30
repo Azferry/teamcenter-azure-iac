@@ -1,5 +1,5 @@
 // =============================================================================
-// modules/storage/storage.bicep
+// modules/storage.bicep
 // Storage account(s) for the Teamcenter deployment (e.g. FMS volumes, backups).
 // Starter configuration — harden and expand as needed.
 // =============================================================================

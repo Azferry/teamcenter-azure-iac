@@ -1,5 +1,5 @@
 // =============================================================================
-// modules/identity/identity.bicep
+// modules/identity.bicep
 // User-assigned managed identity (UMI) for the Teamcenter deployment. Created
 // up front so downstream resources (VMs, storage access, Key Vault RBAC, etc.)
 // can be granted access to a single, stable identity for later use.

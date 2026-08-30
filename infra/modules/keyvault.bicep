@@ -1,5 +1,5 @@
 // =============================================================================
-// modules/keyvault/keyvault.bicep
+// modules/keyvault.bicep
 // Key Vault for the Teamcenter deployment. RBAC-authorized, public network
 // access disabled, reached over a private endpoint on the resource-tier subnet.
 //

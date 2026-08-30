@@ -1,5 +1,5 @@
 // =============================================================================
-// modules/encryption/encryptionset.bicep
+// modules/encryptionset.bicep
 // Disk Encryption Set (customer-managed key) backed by the Key Vault key. Uses a
 // system-assigned identity that is granted "Key Vault Crypto Service Encryption
 // User" on the vault so managed-disk encryption can wrap/unwrap the DES key.

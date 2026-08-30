@@ -1,5 +1,5 @@
 // =============================================================================
-// modules/database/database.bicep
+// modules/database.bicep
 // Database tier for Teamcenter (Oracle / SQL Server on VM, or a managed DB).
 // STUB: intentionally minimal — fill in the DB platform you standardize on.
 // =============================================================================

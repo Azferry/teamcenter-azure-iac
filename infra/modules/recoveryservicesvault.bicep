@@ -1,5 +1,5 @@
 // =============================================================================
-// modules/backup/recoveryservicesvault.bicep
+// modules/recoveryservicesvault.bicep
 // Recovery Services Vault for Teamcenter VM backup. Ships a default daily VM
 // backup policy and is reached over a private endpoint on the resource-tier
 // subnet.
