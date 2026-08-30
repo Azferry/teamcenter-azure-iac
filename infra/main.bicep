@@ -133,7 +133,13 @@ module storage 'modules/storage.bicep' = {
     nameBaseCompact: nameBaseCompact
     location: location
     tags: allTags
+    userAssignedIdentityId: identity.outputs.managedIdentityId
+    keyVaultUri: keyvault.outputs.keyVaultUri
+    keyName: keyvault.outputs.storageKeyName
   }
+  dependsOn: [
+    storageencryption
+  ]
 }
 
 module database 'modules/database.bicep' = {
@@ -179,6 +185,15 @@ module keyvault 'modules/keyvault.bicep' = {
     enablePurgeProtection: keyVaultPurgeProtection
     deployPrivateDns: deployPrivateDns
     privateDnsZoneId: keyVaultPrivateDnsZoneId
+  }
+}
+
+module storageencryption 'modules/storageencryption.bicep' = {
+  name: 'deploy-storageencryption'
+  scope: rg
+  params: {
+    keyVaultName: keyvault.outputs.keyVaultName
+    principalId: identity.outputs.principalId
   }
 }
 

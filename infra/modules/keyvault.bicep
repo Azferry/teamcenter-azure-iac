@@ -37,6 +37,9 @@ param privateDnsZoneId string = ''
 @description('Name of the RSA key created for the disk encryption set.')
 param desKeyName string = 'des-key'
 
+@description('Name of the RSA key created for storage account customer-managed key encryption.')
+param storageKeyName string = 'storage-key'
+
 @description('Instance number for this key vault.')
 param instance int = 1
 
@@ -73,6 +76,20 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
 resource desKey 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
   parent: keyVault
   name: desKeyName
+  properties: {
+    kty: 'RSA'
+    keySize: 3072
+    keyOps: [
+      'wrapKey'
+      'unwrapKey'
+    ]
+  }
+}
+
+// RSA key consumed by the storage account for customer-managed key encryption.
+resource storageKey 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
+  parent: keyVault
+  name: storageKeyName
   properties: {
     kty: 'RSA'
     keySize: 3072
@@ -126,3 +143,5 @@ output keyVaultUri string = keyVault.properties.vaultUri
 output desKeyName string = desKey.name
 output desKeyUri string = desKey.properties.keyUri
 output desKeyUriWithVersion string = desKey.properties.keyUriWithVersion
+output storageKeyName string = storageKey.name
+output storageKeyUri string = storageKey.properties.keyUri

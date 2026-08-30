@@ -25,6 +25,15 @@ param skuName string = 'Standard_LRS'
 @description('Instance number for this storage account.')
 param instance int = 1
 
+@description('Resource ID of the user-assigned managed identity used for customer-managed key access.')
+param userAssignedIdentityId string
+
+@description('Vault URI of the Key Vault that holds the customer-managed key.')
+param keyVaultUri string
+
+@description('Name of the Key Vault key used for storage encryption.')
+param keyName string
+
 // Storage account names: lowercase, alphanumeric, 3-24 chars, globally unique.
 // Deterministic per the naming convention: {baseCompact}st{instance}.
 var storageAccountName = toLower('${nameBaseCompact}st${instance}')
@@ -33,6 +42,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: length(storageAccountName) > 24 ? substring(storageAccountName, 0, 24) : storageAccountName
   location: location
   tags: tags
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${userAssignedIdentityId}': {}
+    }
+  }
   sku: {
     name: skuName
   }
@@ -42,6 +57,26 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     minimumTlsVersion: 'TLS1_2'
     supportsHttpsTrafficOnly: true
     allowBlobPublicAccess: false
+    encryption: {
+      identity: {
+        userAssignedIdentity: userAssignedIdentityId
+      }
+      keySource: 'Microsoft.Keyvault'
+      keyvaultproperties: {
+        keyname: keyName
+        keyvaulturi: keyVaultUri
+      }
+      services: {
+        blob: {
+          enabled: true
+          keyType: 'Account'
+        }
+        file: {
+          enabled: true
+          keyType: 'Account'
+        }
+      }
+    }
   }
 }
 
