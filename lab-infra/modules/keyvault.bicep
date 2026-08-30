@@ -5,8 +5,8 @@
 // parameters at deploy time, so nothing sensitive is committed to source.
 // =============================================================================
 
-@description('Resource name prefix in the form <prefix>-lab.')
-param namePrefixEnv string
+@description('Compact name base in the form {org}{label}{env}{region} (no special chars).')
+param nameBaseCompact string
 
 @description('Azure Government region.')
 param location string
@@ -28,8 +28,12 @@ param adminPassword string
 @secure()
 param dsrmPassword string
 
+@description('Instance number for this key vault.')
+param instance int = 1
+
 // Key Vault names must be globally unique, 3-24 chars, alphanumeric + hyphens.
-var keyVaultName = take('${replace(namePrefixEnv, '-', '')}kv${uniqueString(resourceGroup().id)}', 24)
+// Deterministic per the naming convention: {baseCompact}kv{instance}.
+var keyVaultName = take('${nameBaseCompact}kv${instance}', 24)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName

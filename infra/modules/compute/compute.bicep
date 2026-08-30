@@ -4,8 +4,8 @@
 // STUB: intentionally minimal — add VMs / VMSS for each Teamcenter tier.
 // =============================================================================
 
-@description('Resource name prefix in the form <prefix>-<env>.')
-param namePrefixEnv string
+@description('Hyphenated name base in the form {org}-{label}-{env}-{region}.')
+param nameBase string
 
 @description('Azure Government region.')
 param location string
@@ -17,7 +17,7 @@ param tags object
 param subnetId string
 
 // Placeholder to keep the module valid until compute resources are implemented.
-var computeNamePlaceholder = '${namePrefixEnv}-compute'
+var computeNamePlaceholder = '${nameBase}-vm1'
 
 output computeName string = computeNamePlaceholder
 output computeSubnetId string = subnetId

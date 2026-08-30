@@ -11,10 +11,15 @@ targetScope = 'subscription'
 
 // ----------------------------- Parameters ------------------------------------
 
-@description('Short prefix used to compose resource names, e.g. "tclab".')
-@minLength(2)
-@maxLength(10)
-param namePrefix string = 'tclab'
+@description('3-char organization code, e.g. "ntc".')
+@minLength(3)
+@maxLength(3)
+param org string = 'ntc'
+
+@description('3-4 char workload label, e.g. "plm".')
+@minLength(3)
+@maxLength(4)
+param label string = 'plm'
 
 @description('Azure Government region for all resources.')
 param location string = 'usgovvirginia'
@@ -44,9 +49,30 @@ param dsrmPassword string
 
 // ----------------------------- Variables -------------------------------------
 
-// Consistent naming convention: <prefix>-lab-<resource>
-var namePrefixEnv = '${namePrefix}-lab'
-var resourceGroupName = '${namePrefixEnv}-rg'
+// Naming convention (single source of truth documented in modules/naming.bicep):
+//   Hyphenated : {org}-{label}-{env}-{region}-{type}{instance}
+//   Compact    : {org}{label}{env}{region}{type}{instance}
+// Computed inline as compile-time vars so the resource group name (assigned at
+// subscription scope, before modules run) resolves at the start of deployment.
+var regionCodeMap = {
+  usgovvirginia: 'usgv'
+}
+var regionCode = regionCodeMap[location]
+var nameBase = toLower('${org}-${label}-lab-${regionCode}')
+var nameBaseCompact = toLower('${org}${label}lab${regionCode}')
+var resourceGroupName = '${nameBase}-rg1'
+
+// Emit the resolved names via the shared naming module for downstream reuse and
+// as the canonical definition of the convention.
+module naming '../modules/naming.bicep' = {
+  name: 'compute-naming'
+  params: {
+    org: org
+    label: label
+    env: 'lab'
+    location: location
+  }
+}
 
 var defaultTags = {
   application: 'Teamcenter'
@@ -71,7 +97,7 @@ module keyvault 'modules/keyvault.bicep' = {
   name: 'deploy-keyvault'
   scope: rg
   params: {
-    namePrefixEnv: namePrefixEnv
+    nameBaseCompact: nameBaseCompact
     location: location
     tags: allTags
     deployerObjectId: deployerObjectId
@@ -85,7 +111,7 @@ module network 'modules/network.bicep' = {
   name: 'deploy-network'
   scope: rg
   params: {
-    namePrefixEnv: namePrefixEnv
+    nameBase: nameBase
     location: location
     tags: allTags
   }
@@ -96,7 +122,7 @@ module bastion 'modules/bastion.bicep' = {
   name: 'deploy-bastion'
   scope: rg
   params: {
-    namePrefixEnv: namePrefixEnv
+    nameBase: nameBase
     location: location
     tags: allTags
     bastionSubnetId: network.outputs.bastionSubnetId
@@ -108,7 +134,7 @@ module dc 'modules/domaincontroller.bicep' = {
   name: 'deploy-dc'
   scope: rg
   params: {
-    namePrefixEnv: namePrefixEnv
+    nameBase: nameBase
     location: location
     tags: allTags
     subnetId: network.outputs.dcSubnetId
@@ -126,7 +152,7 @@ module networkDns 'modules/network.bicep' = {
   name: 'deploy-network-dns'
   scope: rg
   params: {
-    namePrefixEnv: namePrefixEnv
+    nameBase: nameBase
     location: location
     tags: allTags
     dnsServers: [

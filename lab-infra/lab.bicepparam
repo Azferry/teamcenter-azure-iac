@@ -4,7 +4,8 @@ using 'main.bicep'
 // SECRETS ARE NOT STORED HERE: adminPassword and dsrmPassword are supplied at
 // deploy time by scripts/Deploy-Lab.ps1 (generated if not provided) and stored
 // in the lab Key Vault. deployerObjectId is also supplied at deploy time.
-param namePrefix = 'tclab'
+param org = 'ntc'
+param label = 'plm'
 param location = 'usgovvirginia'
 param domainName = 'lab.local'
 param dcPrivateIp = '10.60.1.4'

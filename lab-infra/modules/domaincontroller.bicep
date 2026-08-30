@@ -6,8 +6,8 @@
 // The NIC uses a static private IP so the DC can serve DNS reliably.
 // =============================================================================
 
-@description('Resource name prefix in the form <prefix>-lab.')
-param namePrefixEnv string
+@description('Hyphenated name base in the form {org}-{label}-{env}-{region}.')
+param nameBase string
 
 @description('Azure Government region.')
 param location string
@@ -38,10 +38,10 @@ param dsrmPassword string
 @description('VM size for the domain controller.')
 param vmSize string = 'Standard_D2s_v3'
 
-var vmName = '${namePrefixEnv}-dc'
+var vmName = '${nameBase}-vm1'
 // Windows computer names are limited to 15 characters.
-var computerName = take(replace('${namePrefixEnv}dc', '-', ''), 15)
-var nicName = '${vmName}-nic'
+var computerName = take(replace('${nameBase}vm1', '-', ''), 15)
+var nicName = '${vmName}-nic1'
 
 // Inline PowerShell that installs the AD DS role and promotes a new forest.
 // The DSRM password is passed via a protected setting so it is not logged.

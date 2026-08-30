@@ -6,8 +6,8 @@
 // the domain controller after it is promoted (second-pass DNS repoint).
 // =============================================================================
 
-@description('Resource name prefix in the form <prefix>-lab.')
-param namePrefixEnv string
+@description('Hyphenated name base in the form {org}-{label}-{env}-{region}.')
+param nameBase string
 
 @description('Azure Government region.')
 param location string
@@ -27,8 +27,8 @@ param dcSubnetPrefix string = '10.60.1.0/24'
 @description('Custom DNS servers for the VNet. Leave empty to use Azure-provided DNS.')
 param dnsServers array = []
 
-var vnetName = '${namePrefixEnv}-vnet'
-var dcNsgName = '${namePrefixEnv}-dc-nsg'
+var vnetName = '${nameBase}-vnet1'
+var dcNsgName = '${nameBase}-dc-nsg1'
 
 resource dcNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   name: dcNsgName

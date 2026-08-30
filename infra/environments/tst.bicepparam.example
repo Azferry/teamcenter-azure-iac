@@ -1,6 +1,7 @@
 using '../main.bicep'
 
-param namePrefix = 'tc'
+param org = 'ntc'
+param label = 'plm'
 param environmentName = 'tst'
 param location = 'usgovvirginia'
 param tags = {

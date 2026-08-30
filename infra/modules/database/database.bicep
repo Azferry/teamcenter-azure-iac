@@ -4,8 +4,8 @@
 // STUB: intentionally minimal — fill in the DB platform you standardize on.
 // =============================================================================
 
-@description('Resource name prefix in the form <prefix>-<env>.')
-param namePrefixEnv string
+@description('Hyphenated name base in the form {org}-{label}-{env}-{region}.')
+param nameBase string
 
 @description('Azure Government region.')
 param location string
@@ -18,7 +18,7 @@ param subnetId string
 
 // Placeholder to keep the module valid until the DB platform is implemented.
 // Reference params so the linter does not flag them as unused.
-var dbNamePlaceholder = '${namePrefixEnv}-db'
+var dbNamePlaceholder = '${nameBase}-db1'
 
 output databaseName string = dbNamePlaceholder
 output databaseSubnetId string = subnetId

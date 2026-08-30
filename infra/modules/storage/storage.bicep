@@ -4,8 +4,8 @@
 // Starter configuration — harden and expand as needed.
 // =============================================================================
 
-@description('Resource name prefix in the form <prefix>-<env>.')
-param namePrefixEnv string
+@description('Compact name base in the form {org}{label}{env}{region} (no special chars).')
+param nameBaseCompact string
 
 @description('Azure Government region.')
 param location string
@@ -22,8 +22,12 @@ param tags object
 ])
 param skuName string = 'Standard_LRS'
 
+@description('Instance number for this storage account.')
+param instance int = 1
+
 // Storage account names: lowercase, alphanumeric, 3-24 chars, globally unique.
-var storageAccountName = toLower(replace('${namePrefixEnv}sa${uniqueString(resourceGroup().id)}', '-', ''))
+// Deterministic per the naming convention: {baseCompact}st{instance}.
+var storageAccountName = toLower('${nameBaseCompact}st${instance}')
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: length(storageAccountName) > 24 ? substring(storageAccountName, 0, 24) : storageAccountName

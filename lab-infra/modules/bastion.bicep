@@ -4,8 +4,8 @@
 // public IPs on the VMs themselves. Attaches to the AzureBastionSubnet.
 // =============================================================================
 
-@description('Resource name prefix in the form <prefix>-lab.')
-param namePrefixEnv string
+@description('Hyphenated name base in the form {org}-{label}-{env}-{region}.')
+param nameBase string
 
 @description('Azure Government region.')
 param location string
@@ -23,8 +23,8 @@ param bastionSubnetId string
 ])
 param bastionSku string = 'Basic'
 
-var bastionName = '${namePrefixEnv}-bastion'
-var bastionPipName = '${namePrefixEnv}-bastion-pip'
+var bastionName = '${nameBase}-bas1'
+var bastionPipName = '${nameBase}-bas-pip1'
 
 resource bastionPip 'Microsoft.Network/publicIPAddresses@2023-11-01' = {
   name: bastionPipName

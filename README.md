@@ -5,6 +5,8 @@ Infrastructure-as-Code (Bicep) for deploying **Teamcenter** on **Azure Governmen
 ## Layout
 
 ```text
+modules/
+  naming.bicep               # Shared naming convention (region map + name bases)
 infra/
   main.bicep                 # Subscription-scoped orchestrator (creates RG + calls modules)
   environments/
@@ -19,6 +21,49 @@ infra/
 scripts/
   Deploy-Teamcenter.ps1      # az cloud set -> login -> deploy
 ```
+
+## Naming convention
+
+All resources follow a consistent, reusable naming standard. The canonical
+definition lives in `modules/naming.bicep`; each stack computes the same name
+bases inline (as compile-time vars, so the resource group name resolves before
+any module runs).
+
+| Token | Meaning | This deployment |
+|-------|---------|-----------------|
+| `org` | 3-char organization code | `ntc` |
+| `label` | 3-4 char workload label | `plm` |
+| `env` | environment | `dev` / `tst` / `prd` / `lab` |
+| `region` | short region code | `usgv` (usgovvirginia) |
+| `type` | CAF resource-type code | see below |
+| `instance` | instance number, starts at 1 | `1` |
+
+**Patterns**
+
+- Hyphenated (default): `{org}-{label}-{env}-{region}-{type}{instance}`
+  e.g. `ntc-plm-prd-usgv-rg1`
+- Compact (for resources that disallow special chars, e.g. storage accounts and
+  key vaults): `{org}{label}{env}{region}{type}{instance}`
+  e.g. `ntcplmprdusgvst1`
+
+**Resource-type codes (Microsoft CAF)**
+
+| Resource | Code | Resource | Code |
+|----------|------|----------|------|
+| Resource group | `rg` | Storage account | `st` |
+| Virtual network | `vnet` | Key vault | `kv` |
+| Subnet | `snet` | Virtual machine | `vm` |
+| Network security group | `nsg` | Network interface | `nic` |
+| Public IP | `pip` | Bastion | `bas` |
+
+**Region codes**
+
+| Azure region | Code |
+|--------------|------|
+| `usgovvirginia` | `usgv` |
+
+To onboard a new region, add it to `regionCodeMap` in `modules/naming.bicep`
+(and the inline map in each `main.bicep`).
 
 ## Prerequisites
 
@@ -56,7 +101,7 @@ independent of the production Teamcenter stack in `infra/`. It provisions:
 
 ```text
 lab-infra/
-  main.bicep                 # Subscription-scoped orchestrator (creates <prefix>-lab-rg)
+  main.bicep                 # Subscription-scoped orchestrator (creates ntc-plm-lab-usgv-rg1)
   lab.bicepparam             # Non-secret defaults (secrets supplied at deploy time)
   modules/
     keyvault.bicep           # Key Vault + secrets (dc-admin-password, dc-dsrm-password)

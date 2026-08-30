@@ -5,8 +5,8 @@
 // to match your Teamcenter network design.
 // =============================================================================
 
-@description('Resource name prefix in the form <prefix>-<env>.')
-param namePrefixEnv string
+@description('Hyphenated name base in the form {org}-{label}-{env}-{region}.')
+param nameBase string
 
 @description('Azure Government region.')
 param location string
@@ -23,9 +23,9 @@ param computeSubnetPrefix string = '10.50.1.0/24'
 @description('Subnet address prefix for the database tier.')
 param databaseSubnetPrefix string = '10.50.2.0/24'
 
-var vnetName = '${namePrefixEnv}-vnet'
-var computeNsgName = '${namePrefixEnv}-compute-nsg'
-var databaseNsgName = '${namePrefixEnv}-database-nsg'
+var vnetName = '${nameBase}-vnet1'
+var computeNsgName = '${nameBase}-compute-nsg1'
+var databaseNsgName = '${nameBase}-database-nsg1'
 
 resource computeNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   name: computeNsgName
