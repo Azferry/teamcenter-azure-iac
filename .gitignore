@@ -1,0 +1,30 @@
+# ---- Azure / Bicep ----
+# Compiled ARM JSON output from `bicep build`
+*.arm.json
+main.json
+infra/**/*.json
+!infra/**/*.bicepparam
+# Azure CLI local config / cache
+.azure/
+
+# ---- Secrets & local overrides ----
+*.local.*
+*.secret.*
+*.env
+.env
+*.pfx
+*.pem
+*.key
+
+# ---- PowerShell ----
+*.log
+PowerShell_transcript.*
+*.clixml
+
+# ---- Editor / OS ----
+.vs/
+.vscode/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
