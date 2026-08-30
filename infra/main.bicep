@@ -35,21 +35,16 @@ param tags object = {}
 
 // ----------------------------- Variables -------------------------------------
 
-// Naming convention (single source of truth documented in modules/naming.bicep):
-//   Hyphenated : {org}-{label}-{env}-{region}-{type}{instance}
-//   Compact    : {org}{label}{env}{region}{type}{instance}
-// Computed inline as compile-time vars so the resource group name (assigned at
-// subscription scope, before modules run) resolves at the start of deployment.
-var regionCodeMap = {
-  usgovvirginia: 'usgv'
-}
-var regionCode = regionCodeMap[location]
-var nameBase = toLower('${org}-${label}-${environmentName}-${regionCode}')
-var nameBaseCompact = toLower('${org}${label}${environmentName}${regionCode}')
+// Naming: the convention is owned by the shared naming module and consumed here
+// via compile-time imported functions, so names resolve at the start of the
+// deployment (required for the subscription-scope resource group name).
+import { makeBase, makeBaseCompact } from '../modules/naming.bicep'
+
+var nameBase = makeBase(org, label, environmentName, location)
+var nameBaseCompact = makeBaseCompact(org, label, environmentName, location)
 var resourceGroupName = '${nameBase}-rg1'
 
-// Emit the resolved names via the shared naming module for downstream reuse and
-// as the canonical definition of the convention.
+// Emit the resolved names via the shared naming module for downstream reuse.
 module naming '../modules/naming.bicep' = {
   name: 'compute-naming'
   params: {

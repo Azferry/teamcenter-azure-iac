@@ -14,6 +14,35 @@
 
 targetScope = 'subscription'
 
+// ----------------------------- Functions -------------------------------------
+// Exported, compile-time naming functions. These are the single source of truth
+// for the convention and can be imported by any stack, e.g.:
+//   import { makeBase, makeBaseCompact } from '../modules/naming.bicep'
+// Being compile-time, their results are available at the start of a deployment,
+// so they can safely name subscription-scope resources (e.g. resource groups).
+
+@export()
+@description('Maps an Azure region to its short region code. Extend as needed.')
+func regionCodeOf(location string) string => ({
+  usgovvirginia: 'usgv'
+  usgovarizona: 'usga'
+  usgovtexas: 'usgt'
+  eastus: 'eus'
+  eastus2: 'eus2'
+  westus: 'wus'
+  centralus: 'cus'
+})[location]
+
+@export()
+@description('Hyphenated name base: {org}-{label}-{env}-{region}. Append "-{type}{instance}".')
+func makeBase(org string, label string, env string, location string) string =>
+  toLower('${org}-${label}-${env}-${regionCodeOf(location)}')
+
+@export()
+@description('Compact name base: {org}{label}{env}{region}. Append "{type}{instance}".')
+func makeBaseCompact(org string, label string, env string, location string) string =>
+  toLower('${org}${label}${env}${regionCodeOf(location)}')
+
 // ----------------------------- Parameters ------------------------------------
 
 @description('3-char organization code, e.g. "ntc".')
@@ -38,32 +67,15 @@ param env string
 @description('Azure region. Mapped to a short region code internally.')
 param location string = 'usgovvirginia'
 
-// ----------------------------- Variables -------------------------------------
-
-// location -> short region code. Single source of truth; extend as needed.
-var regionCodeMap = {
-  usgovvirginia: 'usgv'
-  usgovarizona: 'usga'
-  usgovtexas: 'usgt'
-  eastus: 'eus'
-  eastus2: 'eus2'
-  westus: 'wus'
-  centralus: 'cus'
-}
-var regionCode = regionCodeMap[location]
-
-// Hyphenated base for hyphen-friendly resource types.
-var base = toLower('${org}-${label}-${env}-${regionCode}')
-// Compact base (no special chars) for storage accounts, key vaults, etc.
-var baseCompact = toLower('${org}${label}${env}${regionCode}')
-
 // ----------------------------- Outputs ---------------------------------------
+// Retained for callers that prefer module outputs over the imported functions.
+// Implemented via the exported functions so there is a single implementation.
 
 @description('Hyphenated name base, e.g. "ntc-plm-prd-usgv". Append "-{type}{instance}".')
-output base string = base
+output base string = makeBase(org, label, env, location)
 
 @description('Compact name base, e.g. "ntcplmprdusgv". Append "{type}{instance}".')
-output baseCompact string = baseCompact
+output baseCompact string = makeBaseCompact(org, label, env, location)
 
 @description('Resolved short region code, e.g. "usgv".')
-output regionCode string = regionCode
+output regionCode string = regionCodeOf(location)
