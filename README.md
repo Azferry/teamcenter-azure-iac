@@ -1,6 +1,23 @@
-# teamcenter-azure-iac
+# Infrastructure-as-Code (Bicep) for deploying **Teamcenter** on **Azure Government**.
 
-Infrastructure-as-Code (Bicep) for deploying **Teamcenter** on **Azure Government**.
+## Overview
+
+This repository deploys a baseline Teamcenter platform using modular Bicep templates.
+It is designed for a **parameter-driven** rollout so each environment can control:
+
+- the number of servers per Teamcenter role,
+- the VM SKU (`vmSize`) per role,
+- Windows-by-default or Linux override for supported roles,
+- Oracle on IaaS (BYOL on RHEL), and
+- internal-only networking with private endpoints.
+
+The deployment currently implements:
+
+- **Web tier**: Teamcenter web and TCSS roles
+- **Enterprise tier**: application/service roles (enterprise, pool manager, AWC, FMS/FSC, Solr, dispatcher, license)
+- **Resource tier**: Oracle VM infrastructure and Premium Azure Files for FMS volumes
+
+Client/AVD and public ingress components are intentionally excluded in this baseline.
 
 ## Layout
 
@@ -28,6 +45,102 @@ infra/
 scripts/
   Deploy-Teamcenter.ps1      # az cloud set -> login -> deploy
 ```
+
+## Deployment details
+
+### Deployment scope and flow
+
+- `infra/main.bicep` is **subscription-scoped**.
+- It creates the target resource group, then deploys modules into that group.
+- Core module order is:
+  1. network
+  2. identity
+  3. key vault + keys
+  4. storage encryption role assignment
+  5. disk encryption set
+  6. storage + fileshare
+  7. compute + database
+  8. recovery services vault
+
+### Network model
+
+By default, the deployment creates a VNet with three subnets:
+
+- `web-tier-sn`
+- `enterprise-tier-sn`
+- `resource-tier-sn`
+
+Bring-your-own VNet is supported through `deployVnet = false` and existing subnet parameters.
+
+NSGs are included with starter rules to allow tier-to-tier traffic and deny inbound internet.
+
+### Compute and scale model
+
+Compute is deployed by role via reusable VM modules. Each role object is parameter-driven.
+Common controls:
+
+- `enabled`
+- `count`
+- `vmSize`
+- `osType`
+- `image`
+- `availabilityZones`
+
+To scale a role, update `count` in the environment parameter file.
+To change server SKU, update `vmSize` for that role.
+
+### Database model (Oracle IaaS)
+
+Oracle infrastructure is provisioned as VMs (BYOL) on RHEL defaults.
+
+- Primary role: `oraclePrimary`
+- Optional HA/DR roles: `oracleStandby`, `oracleObserver`
+
+Disk and VM sizing are parameter-driven in environment files.
+
+### FMS storage model
+
+FMS volumes use **Premium Azure Files (SMB)** with private endpoint.
+The deployment outputs the share UNC path as `fmsFilesShareUnc`.
+
+Alternative supported design (future): FMS VM with attached/striped Premium managed disks.
+
+### Environment parameter files
+
+Use environment files under `infra/environments/` to control topology:
+
+- `dev.bicepparam`
+- `tst.bicepparam`
+- `prd.bicepparam`
+
+These files define per-role server count, per-role SKU, Oracle role toggles, and FMS share sizing.
+
+### Server roles table
+
+| Server role parameter | Tier | Purpose |
+|---|---|---|
+| `webServer` | Web | Hosts Teamcenter web services and Active Workspace gateway endpoint. |
+| `tcss` | Web | Runs Teamcenter Security Services (SSO/SAML integration path). |
+| `enterprise` | Enterprise | Runs Teamcenter core enterprise/business logic services. |
+| `poolManager` | Enterprise | Manages server pools and session distribution for 4-tier components. |
+| `awcPortal` | Enterprise | Hosts Active Workspace portal/application services. |
+| `fmsVolumeServer` | Enterprise | Owns Teamcenter FMS volume service integration point. |
+| `fscCache` | Enterprise | Provides Teamcenter file cache services (FSC) for performance. |
+| `solr` | Enterprise | Hosts Apache Solr for Teamcenter search/index functions. |
+| `dispatcher` | Enterprise | Runs Teamcenter dispatcher/processing jobs. |
+| `visualization` | Enterprise | Optional visualization workload host (GPU-capable SKU). |
+| `licenseServer` | Enterprise | Hosts Teamcenter/Flex license service. |
+| `oraclePrimary` | Resource | Oracle database primary VM (IaaS, BYOL on RHEL). |
+| `oracleStandby` | Resource | Optional Oracle Data Guard standby VM for HA/DR. |
+| `oracleObserver` | Resource | Optional Oracle Data Guard observer VM for failover orchestration. |
+| `fmsFilesShareUnc` (output) | Resource | Premium Azure Files SMB share path used for FMS volume storage. |
+
+### Security controls in baseline
+
+- Managed identity for service access
+- CMK-backed encryption (Key Vault + Disk Encryption Set)
+- Private endpoints for vault/backup/fileshare modules (with optional private DNS linking)
+- Internal-only server topology (no public IPs in compute/database roles)
 
 ## Naming convention
 
