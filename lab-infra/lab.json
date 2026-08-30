@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "deployerObjectId": {
+      "value": "00000000-0000-0000-0000-000000000000"
+    },
+    "adminPassword": {
+      "value": "TempPass!234567890Abc"
+    },
+    "dsrmPassword": {
+      "value": "TempPass!234567890Xyz"
+    },
+    "org": {
+      "value": "ntc"
+    },
+    "label": {
+      "value": "plm"
+    },
+    "location": {
+      "value": "usgovvirginia"
+    },
+    "domainName": {
+      "value": "lab.local"
+    },
+    "dcPrivateIp": {
+      "value": "10.60.1.4"
+    },
+    "adminUsername": {
+      "value": "labadmin"
+    },
+    "tags": {
+      "value": {
+        "costCenter": "REPLACE-ME",
+        "owner": "REPLACE-ME"
+      }
+    }
+  }
+}

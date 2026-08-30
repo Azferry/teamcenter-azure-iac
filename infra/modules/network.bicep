@@ -54,9 +54,9 @@ param enterpriseTierSubnetPrefix string = '10.50.2.0/24'
 param resourceTierSubnetPrefix string = '10.50.3.0/24'
 
 var vnetName = '${nameBase}-vnet1'
-var webNsgName = '${nameBase}-web-nsg1'
-var enterpriseNsgName = '${nameBase}-enterprise-nsg1'
-var resourceNsgName = '${nameBase}-resource-nsg1'
+var webNsgName = '${nameBase}-nsg1-web'
+var enterpriseNsgName = '${nameBase}-nsg1-enterprise'
+var resourceNsgName = '${nameBase}-nsg1-resource'
 
 // Resolve the resource group that holds the existing VNet in BYO mode.
 var existingVnetRg = empty(existingVnetResourceGroup) ? resourceGroup().name : existingVnetResourceGroup
