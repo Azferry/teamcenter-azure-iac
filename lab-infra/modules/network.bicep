@@ -37,10 +37,10 @@ param resourceTierSubnetPrefix string = '10.60.4.0/24'
 param dnsServers array = []
 
 var vnetName = '${nameBase}-vnet1'
-var dcNsgName = '${nameBase}-dc-nsg1'
-var webNsgName = '${nameBase}-web-nsg1'
-var enterpriseNsgName = '${nameBase}-enterprise-nsg1'
-var resourceNsgName = '${nameBase}-resource-nsg1'
+var dcNsgName = '${nameBase}-nsg1-dc'
+var webNsgName = '${nameBase}-nsg1-web'
+var enterpriseNsgName = '${nameBase}-nsg1-enterprise'
+var resourceNsgName = '${nameBase}-nsg1-resource'
 
 resource dcNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   name: dcNsgName
@@ -125,7 +125,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
         }
       }
       {
-        name: 'web-tier-sn'
+        name: 'nsg1-web'
         properties: {
           addressPrefix: webTierSubnetPrefix
           networkSecurityGroup: {
@@ -134,7 +134,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
         }
       }
       {
-        name: 'enterprise-tier-sn'
+        name: 'nsg1-enterprise'
         properties: {
           addressPrefix: enterpriseTierSubnetPrefix
           networkSecurityGroup: {
@@ -143,7 +143,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
         }
       }
       {
-        name: 'resource-tier-sn'
+        name: 'nsg1-resource'
         properties: {
           addressPrefix: resourceTierSubnetPrefix
           networkSecurityGroup: {

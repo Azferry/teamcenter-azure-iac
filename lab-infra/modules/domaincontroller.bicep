@@ -36,7 +36,7 @@ param adminPassword string
 param dsrmPassword string
 
 @description('VM size for the domain controller.')
-param vmSize string = 'Standard_D2s_v3'
+param vmSize string = 'Standard_B2s_v2'
 
 var vmName = '${nameBase}-vm1'
 // Windows computer names are limited to 15 characters.
