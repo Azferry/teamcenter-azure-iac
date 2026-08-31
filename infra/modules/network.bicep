@@ -66,8 +66,34 @@ resource webNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = if (deplo
   location: location
   tags: tags
   properties: {
-    // TODO: add Teamcenter web-tier security rules.
-    securityRules: []
+    securityRules: [
+      {
+        name: 'allow-https-from-vnet'
+        properties: {
+          priority: 100
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefix: 'VirtualNetwork'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'deny-internet-inbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: 'Internet'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
   }
 }
 
@@ -76,8 +102,53 @@ resource enterpriseNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = if
   location: location
   tags: tags
   properties: {
-    // TODO: add Teamcenter enterprise-tier security rules.
-    securityRules: []
+    securityRules: [
+      {
+        name: 'allow-tc-ports-from-web'
+        properties: {
+          priority: 100
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRanges: [
+            '4544'
+            '4545'
+            '7001-7010'
+            '8983'
+            '27000-27099'
+          ]
+          sourceAddressPrefix: webTierSubnetPrefix
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'allow-enterprise-eastwest'
+        properties: {
+          priority: 120
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: enterpriseTierSubnetPrefix
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'deny-internet-inbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: 'Internet'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
   }
 }
 
@@ -86,8 +157,50 @@ resource resourceNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = if (
   location: location
   tags: tags
   properties: {
-    // TODO: add Teamcenter resource-tier security rules.
-    securityRules: []
+    securityRules: [
+      {
+        name: 'allow-oracle-from-enterprise'
+        properties: {
+          priority: 100
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRanges: [
+            '1521'
+            '5500'
+          ]
+          sourceAddressPrefix: enterpriseTierSubnetPrefix
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'allow-resource-eastwest'
+        properties: {
+          priority: 120
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: resourceTierSubnetPrefix
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'deny-internet-inbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: 'Internet'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
   }
 }
 

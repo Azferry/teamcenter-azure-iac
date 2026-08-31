@@ -70,6 +70,296 @@ param keyVaultPrivateDnsZoneId string = ''
 @description('BYO: resource ID of the AzureBackup private DNS zone (Recovery Services Vault).')
 param recoveryVaultPrivateDnsZoneId string = ''
 
+@description('BYO: resource ID of the privatelink.file.core.usgovcloudapi.net private DNS zone (Azure Files).')
+param filesPrivateDnsZoneId string = ''
+
+@description('Admin username for Teamcenter compute VMs.')
+param computeAdminUsername string = 'tcadmin'
+
+@description('Admin password for Teamcenter compute VMs.')
+@secure()
+param computeAdminPassword string
+
+@description('Admin username for Oracle VMs.')
+param oracleAdminUsername string = 'oracleadmin'
+
+@description('Admin password for Oracle VMs.')
+@secure()
+param oracleAdminPassword string
+
+@description('Web server + AWC gateway role settings.')
+param webServer object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_D8ds_v5'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Teamcenter Security Services (TCSS) settings.')
+param tcss object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_D4ds_v5'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Enterprise/foundation server settings.')
+param enterprise object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_F16s_v2'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Pool manager role settings.')
+param poolManager object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_D4_v4'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Active Workspace portal role settings.')
+param awcPortal object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_D8ds_v5'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('FMS volume server settings.')
+param fmsVolumeServer object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_F16s_v2'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('FSC cache server settings.')
+param fscCache object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_D8ds_v5'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Apache Solr role settings.')
+param solr object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_D8ds_v5'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Dispatcher role settings.')
+param dispatcher object = {
+  enabled: false
+  count: 0
+  vmSize: 'Standard_F16s_v2'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Visualization role settings.')
+param visualization object = {
+  enabled: false
+  count: 0
+  vmSize: 'Standard_NV36ads_A10_v5'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Flex license server settings.')
+param licenseServer object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_D2s_v5'
+  osType: 'Windows'
+  image: {
+    publisher: 'MicrosoftWindowsServer'
+    offer: 'WindowsServer'
+    sku: '2022-datacenter-azure-edition'
+    version: 'latest'
+  }
+  osDiskSizeGb: 128
+  dataDisks: []
+  availabilityZones: []
+}
+
+@description('Oracle primary role settings (RHEL BYOL on IaaS).')
+param oraclePrimary object = {
+  enabled: true
+  count: 1
+  vmSize: 'Standard_E32-16ds_v4'
+  osDiskSizeGb: 128
+  availabilityZones: []
+  dataDisks: [
+    {
+      lun: 0
+      sizeGb: 1024
+      sku: 'PremiumV2_LRS'
+    }
+    {
+      lun: 1
+      sizeGb: 1024
+      sku: 'PremiumV2_LRS'
+    }
+    {
+      lun: 2
+      sizeGb: 1024
+      sku: 'PremiumV2_LRS'
+    }
+    {
+      lun: 3
+      sizeGb: 1024
+      sku: 'PremiumV2_LRS'
+    }
+    {
+      lun: 4
+      sizeGb: 512
+      sku: 'PremiumV2_LRS'
+    }
+    {
+      lun: 5
+      sizeGb: 512
+      sku: 'PremiumV2_LRS'
+    }
+    {
+      lun: 6
+      sizeGb: 128
+      sku: 'PremiumV2_LRS'
+    }
+    {
+      lun: 7
+      sizeGb: 128
+      sku: 'PremiumV2_LRS'
+    }
+  ]
+}
+
+@description('Oracle standby Data Guard role settings.')
+param oracleStandby object = {
+  enabled: false
+  count: 0
+  vmSize: 'Standard_E32-16ds_v4'
+  osDiskSizeGb: 128
+  availabilityZones: []
+  dataDisks: []
+}
+
+@description('Oracle observer role settings.')
+param oracleObserver object = {
+  enabled: false
+  count: 0
+  vmSize: 'Standard_D2s_v5'
+  osDiskSizeGb: 64
+  availabilityZones: []
+  dataDisks: []
+}
+
+@description('Oracle image settings (RHEL BYOL).')
+param oracleImage object = {
+  publisher: 'RedHat'
+  offer: 'RHEL'
+  sku: '8-lvm-gen2'
+  version: 'latest'
+}
+
+@description('Azure Files share name for FMS volumes.')
+param fmsShareName string = 'teamcenter-fms'
+
+@description('Azure Files Premium quota in GiB for FMS.')
+@minValue(100)
+param fmsShareQuotaGiB int = 1024
+
 
 // ----------------------------- Variables -------------------------------------
 
@@ -142,6 +432,21 @@ module storage 'modules/storage.bicep' = {
   ]
 }
 
+module fileshare 'modules/fileshare.bicep' = {
+  name: 'deploy-fms-fileshare'
+  scope: rg
+  params: {
+    nameBaseCompact: nameBaseCompact
+    location: location
+    tags: allTags
+    subnetId: network.outputs.resourceTierSubnetId
+    shareName: fmsShareName
+    shareQuotaGiB: fmsShareQuotaGiB
+    deployPrivateDns: deployPrivateDns
+    privateDnsZoneId: filesPrivateDnsZoneId
+  }
+}
+
 module database 'modules/database.bicep' = {
   name: 'deploy-database'
   scope: rg
@@ -150,6 +455,15 @@ module database 'modules/database.bicep' = {
     location: location
     tags: allTags
     subnetId: network.outputs.resourceTierSubnetId
+    adminUsername: oracleAdminUsername
+    adminPassword: oracleAdminPassword
+    diskEncryptionSetId: encryptionset.outputs.diskEncryptionSetId
+    managedIdentityId: identity.outputs.managedIdentityId
+    bootDiagnosticsStorageUri: storage.outputs.storageAccountName == '' ? '' : 'https://${storage.outputs.storageAccountName}.blob.core.usgovcloudapi.net/'
+    oraclePrimary: oraclePrimary
+    oracleStandby: oracleStandby
+    oracleObserver: oracleObserver
+    oracleImage: oracleImage
   }
 }
 
@@ -160,7 +474,25 @@ module compute 'modules/compute.bicep' = {
     nameBase: nameBase
     location: location
     tags: allTags
-    subnetId: network.outputs.enterpriseTierSubnetId
+    webSubnetId: network.outputs.webTierSubnetId
+    enterpriseSubnetId: network.outputs.enterpriseTierSubnetId
+    adminUsername: computeAdminUsername
+    adminPassword: computeAdminPassword
+    diskEncryptionSetId: encryptionset.outputs.diskEncryptionSetId
+    managedIdentityId: identity.outputs.managedIdentityId
+    bootDiagnosticsStorageUri: storage.outputs.storageAccountName == '' ? '' : 'https://${storage.outputs.storageAccountName}.blob.core.usgovcloudapi.net/'
+    fmsShareUncPath: fileshare.outputs.uncPath
+    webServer: webServer
+    tcss: tcss
+    enterprise: enterprise
+    poolManager: poolManager
+    awcPortal: awcPortal
+    fmsVolumeServer: fmsVolumeServer
+    fscCache: fscCache
+    solr: solr
+    dispatcher: dispatcher
+    visualization: visualization
+    licenseServer: licenseServer
   }
 }
 
@@ -232,4 +564,5 @@ output managedIdentityId string = identity.outputs.managedIdentityId
 output keyVaultId string = keyvault.outputs.keyVaultId
 output diskEncryptionSetId string = encryptionset.outputs.diskEncryptionSetId
 output recoveryServicesVaultId string = backup.outputs.recoveryServicesVaultId
+output fmsFilesShareUnc string = fileshare.outputs.uncPath
 
