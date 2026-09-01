@@ -1,0 +1,27 @@
+org              = "ntc"
+label            = "plm"
+environment_name = "dev"
+location         = "usgovvirginia"
+
+tags = {
+  costCenter = "REPLACE-ME"
+  owner      = "REPLACE-ME"
+}
+
+deploy_vnet                     = true
+existing_vnet_name              = ""
+existing_vnet_resource_group    = ""
+existing_web_tier_subnet_name   = "web-tier-sn"
+existing_enterprise_tier_subnet_name = "enterprise-tier-sn"
+existing_resource_tier_subnet_name   = "resource-tier-sn"
+
+key_vault_purge_protection      = false
+recovery_vault_purge_protection = false
+deploy_private_dns              = false
+key_vault_private_dns_zone_id   = ""
+recovery_vault_private_dns_zone_id = ""
+files_private_dns_zone_id       = ""
+
+# Set secrets via environment variables:
+# TF_VAR_compute_admin_password
+# TF_VAR_oracle_admin_password
