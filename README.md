@@ -42,6 +42,8 @@ infra/
     database/
       oracle-vm.bicep        # Oracle primary/standby VM wrapper
       oracle-dataguard.bicep # Optional Data Guard observer + standby
+terraform/
+  infra/                     # Terraform working directory (provider/module cache present)
 scripts/
   Deploy-Teamcenter.ps1      # az cloud set -> login -> deploy
 ```
@@ -206,6 +208,89 @@ optionally selects a subscription, and runs the Bicep deployment.
 
 Parameters: `-Environment` (dev|tst|prd), `-Location` (default `usgovvirginia`),
 `-SubscriptionId`, `-TenantId`, `-WhatIf`.
+
+## Terraform implementation
+
+Current implementation status in this repository:
+
+- The deployable baseline is implemented with **Bicep** under `infra/`.
+- A `terraform/infra/` working directory exists for Terraform usage.
+- At this time, Terraform source files (`.tf`) are not committed in this repo.
+- Target parity for Terraform should align with the same baseline tiers used by Bicep: web, enterprise, resource, private networking, and secure-by-default controls.
+
+If Terraform source is added later, use Azure Government endpoints and keep naming, role model, and environment parameterization aligned with `infra/environments/*.bicepparam`.
+
+## Reference architecture (quick overview)
+
+Reference: [Siemens Teamcenter baseline architecture on Azure](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/manufacturing/teamcenter-baseline)
+
+```mermaid
+flowchart LR
+  U[Teamcenter users<br/>Rich Client / AWC Client] --> ID[Microsoft Entra ID<br/>SSO (SAML)]
+  A[Admins / Support<br/>On-premises] --> ER[ExpressRoute / VPN]
+
+  subgraph Hub[Hub Virtual Network]
+    FW[Azure Firewall]
+    AGW[Azure Application Gateway]
+  end
+
+  subgraph Spoke[Spoke Virtual Network]
+    subgraph WebTier[Web Tier]
+      TCSS[TCSS]
+      WEB[Teamcenter Web Servers]
+      AWCGW[AWC Gateway]
+    end
+
+    subgraph EnterpriseTier[Enterprise Tier]
+      CORE[Teamcenter Foundation / Services]
+      DISPATCH[Dispatcher]
+      AWC[AWC Portal]
+      FMS[FMS / FSC]
+      SOLR[Apache Solr]
+      LIC[License Server]
+    end
+
+    subgraph ResourceTier[Resource Tier]
+      DB[Oracle or SQL Database]
+      STORAGE[Azure Files Premium / ANF]
+    end
+
+    KV[Azure Key Vault]
+    MON[Azure Monitor]
+    BAK[Azure Backup]
+  end
+
+  ID --> FW
+  ER --> FW
+  FW --> AGW
+  AGW --> TCSS
+  AGW --> WEB
+  AGW --> AWCGW
+
+  TCSS --> CORE
+  WEB --> CORE
+  AWCGW --> AWC
+  CORE --> DB
+  CORE --> STORAGE
+  FMS --> STORAGE
+
+  KV -. secrets/certs .-> WebTier
+  KV -. secrets/certs .-> EnterpriseTier
+  MON -. telemetry .-> WebTier
+  MON -. telemetry .-> EnterpriseTier
+  MON -. telemetry .-> ResourceTier
+  BAK -. protection .-> DB
+  BAK -. protection .-> STORAGE
+```
+
+- Diagram above is a simplified rendering of the Microsoft reference architecture for documentation purposes.
+
+- Uses a **hub-spoke** network: internet/on-prem traffic enters hub controls, then routes to a spoke hosting Teamcenter tiers.
+- Defines **four tiers**: client, web, enterprise, and resource.
+- Web tier commonly includes **TCSS**, Teamcenter web servers, and Active Workspace gateway behind load balancing.
+- Enterprise tier hosts Teamcenter business services (for example foundation/services, dispatcher, AWC portal, FMS/FSC, Solr, and license roles).
+- Resource tier provides database and storage services (for example Oracle/SQL options and Azure Files Premium or Azure NetApp Files patterns).
+- Security and operations patterns include SSO with Microsoft Entra ID (SAML), NSG segmentation, Azure Firewall in hub designs, Key Vault for secrets/certs, and Azure Monitor/Azure Backup for observability and protection.
 
 ## Lab landing zone (demo)
 
