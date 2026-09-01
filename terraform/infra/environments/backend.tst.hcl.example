@@ -1,0 +1,4 @@
+resource_group_name  = "REPLACE-ME-rg"
+storage_account_name = "REPLACE-ME-state"
+container_name       = "tfstate"
+key                  = "teamcenter-tst.tfstate"
