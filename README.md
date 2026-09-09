@@ -11,6 +11,10 @@ It is designed for a **parameter-driven** rollout so each environment can contro
 - Oracle on IaaS (BYOL on RHEL), and
 - internal-only networking with private endpoints.
 
+## Siemens support documentation
+
+- [Siemens License Server Installation Guide](https://docs.sw.siemens.com/en-US/doc/1586485382/202507021.sw_siemens_license_server_install/titlepage)
+
 The deployment currently implements:
 
 - **Web tier**: Teamcenter web and TCSS roles
