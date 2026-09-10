@@ -14,6 +14,7 @@ It is designed for a **parameter-driven** rollout so each environment can contro
 ## Siemens support documentation
 
 - [Siemens License Server Installation Guide](https://docs.sw.siemens.com/en-US/doc/1586485382/202507021.sw_siemens_license_server_install/titlepage)
+- [Siemens Deployment Center](https://docs.sw.siemens.com/en-US/doc/282219420/PL20251212545240207.deployment_center/xid1161109?audience=external)
 
 The deployment currently implements:
 
