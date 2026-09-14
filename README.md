@@ -231,8 +231,8 @@ Reference: [Siemens Teamcenter baseline architecture on Azure](https://learn.mic
 
 ```mermaid
 flowchart LR
-  U[Teamcenter users<br/>Rich Client / AWC Client] --> ID[Microsoft Entra ID<br/>SSO (SAML)]
-  A[Admins / Support<br/>On-premises] --> ER[ExpressRoute / VPN]
+  U["Teamcenter users\nRich Client / AWC Client"] --> ID["Microsoft Entra ID\nSSO (SAML)"];
+  A["Admins / Support\nOn-premises"] --> ER["ExpressRoute / VPN"];
 
   subgraph Hub[Hub Virtual Network]
     FW[Azure Firewall]
